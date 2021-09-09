@@ -1,0 +1,53 @@
+
+.bgr{
+    height: 100vh;
+    min-width: 100%;
+    background-color: indigo;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.buttonActive{
+    padding-right: 15px;
+    padding-left: 15px;
+    height: 69%;
+    background-color:deepskyblue;
+    font-size: 30px;
+    font-weight: bold;
+    color:indigo;
+}
+.buttonNot{
+    background-color: darkgrey;
+    font-size: 30px;
+    font-weight: bold;
+    color: dimgrey;
+    padding-right: 15px;
+    padding-left: 15px;
+    height: 70%;
+}
+
+.input{
+    height: 60%;
+    width: 60px;
+    text-align: center;
+    border: 3px solid deepskyblue;
+    font-size: 20px;
+    font-weight: normal;
+
+}
+
+.inputErr {
+    height: 60%;
+    width: 60px;
+    text-align: center;
+    background: pink;
+    border: 3px solid red;
+    color: red;
+    font-size: 20px;
+    font-weight: normal;
+
+}
+
+
