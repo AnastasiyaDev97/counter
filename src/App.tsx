@@ -1,233 +1,137 @@
-import React, {ChangeEvent, useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import s from './App.module.css'
-import {Counter2} from "./Counter2/Counter2";
-import {Counter1} from './Counter1/Counter1';
+import {Counter} from "./Counter/Counter";
+import {FormWithSettings} from './FormWithSettings/FormWithSettings';
+import {v1} from "uuid";
 
 export type buttonType = {
-    id: number
+    id: string
     name: string
     callback: () => void
-    className: string
+    status: boolean
 
 }
 export type inputType = {
-    id: number
+    id: string
     name: string
-    value: string
-    clForInput: string
-    upClickHandler: () => void
-    downClickHandler: () => void
+    value: number
+    changeSettingsValue: (value: number) => void
 }
 export type InputsType = Array<inputType>
 export type ButtonDataType = Array<buttonType>
 
 export function App() {
-    let [count, setCount] = useState<number | string>(0)
-    let [clForButtonInc, setClForButtonInc] = useState(s.buttonActive)
-    let [clForButtonSet, setClForButtonSet] = useState(s.buttonNot)
-    let [clForButtonReset, setClForButtonReset] = useState(s.buttonNot)
-    let [startValue, setStartValue] = useState('0')
-    let [maxValue, setMaxValue] = useState('5')
-    let [clForInputMax, setClForInputMax] = useState(s.input);
-    let [clForInputStart, setClForInputStart] = useState(s.input);
+
+    let [count, setCount] = useState<number>(0)
+    let [startValue, setStartValue] = useState<number>(0)
+    let [maxValue, setMaxValue] = useState<number>(5)
+    let [message, setMessage] = useState('')
+    let [isSetActive, setIsSetActive] = useState(true)
+    let [isResetActive, setIsResetActive] = useState(!isSetActive && true)
+    let [isIncActive, setIsIncActive] = useState(!isSetActive && true)
+
+    let ButtonsData = [
+        {
+            id: v1(), name: 'set', callback: () => {
+                onSetHandler()
+            }, status: isSetActive
+        },
+        {
+            id: v1(), name: 'inc', callback: () => {
+                onIncHandler()
+            }, status: isIncActive
+        },
+        {
+            id: v1(), name: 'reset', callback: () => {
+                onResetHandler()
+            }, status: isResetActive
+        }
+    ]
+
 
     const onIncHandler = () => {
+        setIsResetActive(true)
         if (count < maxValue) {
-            count = Number(count) + 1
+            count++
             setCount(count)
         }
-        if (count == maxValue) {
-            setClForButtonInc(s.buttonNot)
-        }
-        if (count > 0) {
-            setClForButtonReset(s.buttonActive)
+        if (count === maxValue) {
+            setIsIncActive(false)
         }
     }
+
     const onResetHandler = () => {
-        if (count > 0) {
-            setCount(0)
-            setClForButtonReset(s.buttonNot)
-            setClForButtonInc(s.buttonActive)
-        }
+        setIsResetActive(false)
+        setCount(startValue)
+        setIsIncActive(true)
+
     }
 
     const onSetHandler = () => {
-        if (clForButtonSet !== s.buttonNot) {
-            setCount(startValue)
-            setClForButtonSet(s.buttonNot)
-            setToLocalStorage('maxValue',maxValue)
-            setToLocalStorage('startValue',startValue)
-        }
+        setCount(startValue)
+        setMessage('')
+        setIsSetActive(false)
+        setIsIncActive(true)
+        setToLocalStorage('maxValue', maxValue)
+        setToLocalStorage('startValue', startValue)
     }
 
-    let ButtonDataCont1 = [
-        {
-            id: 1, name: 'set', callback: () => {
-                onSetHandler()
-            }, className: clForButtonSet
-        }
-    ]
-    let ButtonDataCont2 = [
-        {
-            id: 1, name: 'inc', callback: () => {
-                onIncHandler()
-            }, className: clForButtonInc
-        },
-        {
-            id: 2, name: 'reset', callback: () => {
-                onResetHandler()
-            }, className: clForButtonReset
-        }
-    ]
-    const allSetsCorrect = (value: string, setValue: (value: string) => void) => {
-        setValue(value)
-        setClForButtonSet(s.buttonActive)
-        setClForInputStart(s.input)
-        setClForInputMax(s.input)
-        setCount('enter value and press set')
+
+    useEffect(() => {
+        getFromLocalStorage('maxValue', setMaxValue)
+        getFromLocalStorage('startValue', setStartValue)
+    }, [])
+
+    const setToLocalStorage = (key: string, value: number) => {
+        localStorage.setItem(key, JSON.stringify(value))
     }
-    const allSetsIncorr = (value: string, setValue: (value: string) => void, setClForInp: (clForInp: string) => void) => {
-        setValue(value)
-        setClForButtonSet(s.buttonNot)
-        setClForInp(s.inputErr)
-        setCount('Incorrect value!')
-    }
-    const setToLocalStorage = (key: string, value: string) => {
-        localStorage.setItem(key, value)
-    }
-    const getFromLocalStorage = (key: string, setValue: (value: string) => void) => {
+
+    const getFromLocalStorage = (key: string, setValue: (value: number) => void) => {
         let ValueFromLocStAsString = localStorage.getItem(key)
-
         if (ValueFromLocStAsString) {
-            setValue(ValueFromLocStAsString)
-            if(key==='startValue'){
-                setCount(ValueFromLocStAsString)
+            setValue(JSON.parse(ValueFromLocStAsString))
+            if (key === 'startValue') {
+                setCount(JSON.parse(ValueFromLocStAsString))
             }
         }
     }
 
     useEffect(() => {
-        getFromLocalStorage('maxValue',setMaxValue)
-    }, [])
-    useEffect(() => {
-        getFromLocalStorage('startValue',setStartValue)
-    }, [])
-
-    /*   const upClickHandler = (value: string, setValue: (value: string) => void, setClForInp: (clForInp: string) => void) => {
-
-           value=String(Number(value)+1)
-           console.log(value)
-
-
-           console.log(Number(value) > Number(startValue))
-               if (Number(value) > -1||Number(value) > Number(startValue)) {
-                   setValue(value)
-                   setClForButtonReset(s.buttonActive)
-                   setClForInputStart(s.input)
-                   setClForInputMax(s.input)
-                   setCount('enter value and press set')
-
-                   /!*allSetsCorrect(value, setValue)*!/
-               } else {
-                   console.log(value)
-                   console.log(maxValue)
-                   console.log(startValue)
-                   console.log(Number(maxValue) > Number(startValue))
-                   allSetsIncorr(value, setValue, setClForInp)
-               }
-       }*/
-
-    const upClickHandlerMax = () => {
-        maxValue = String(Number(maxValue) + 1)
-        if (Number(maxValue) > -1 && Number(maxValue) > Number(startValue)) {
-            allSetsCorrect(maxValue, setMaxValue)
+        if (startValue >= maxValue || startValue < 0 || maxValue < 0 || maxValue <= startValue) {
+            setMessage('error')
+            setIsSetActive(false)
         } else {
-            allSetsIncorr(maxValue, setMaxValue, setClForInputMax)
+            setIsSetActive(true)
         }
+    }, [startValue, maxValue])
+
+
+    const changeSettingsMaxValue = (value: number) => {
+        setMaxValue(value)
+        setMessage('changes')
     }
-    const upClickHandlerStart = () => {
-        startValue = String(Number(startValue) + 1)
-        if (Number(startValue) > -1 && Number(startValue) < Number(maxValue)) {
-            allSetsCorrect(startValue, setStartValue)
-        } else {
-            allSetsIncorr(startValue, setStartValue, setClForInputStart)
-        }
-    }
-    /* const downClickHandler = (value: string, setValue: (value: string) => void, setClForInp: (clForInp: string) => void) => {
-         /!*if (value === maxValue) {
-             value = String(Number(value) - 1)
-             maxValue = value
-             if (Number(value) > -1 && Number(maxValue) > Number(startValue)) {
-
-                 allSetsCorrect(value, setValue)
-             } else {
-
-                 allSetsIncorr(value, setValue, setClForInp)
-             }
-
-         }
-         if (value === startValue) {
-             value = String(Number(value) - 1)
-             startValue = value
-             if (Number(value) > -1 && Number(maxValue) > Number(startValue)) {
-                 console.log(Number(maxValue) > Number(startValue));
-                 allSetsCorrect(value, setValue)
-             } else {
-                 console.log(Number(maxValue) > Number(startValue))
-                 allSetsIncorr(value, setValue, setClForInp)
-             }
-
-         }*!/
-     }*/
-
-    const downClickHandlerMax = () => {
-        maxValue = String(Number(maxValue) - 1)
-        if (Number(maxValue) > -1 && Number(maxValue) > Number(startValue)) {
-            allSetsCorrect(maxValue, setMaxValue)
-        } else {
-            allSetsIncorr(maxValue, setMaxValue, setClForInputMax)
-        }
-    }
-    const downClickHandlerStart = () => {
-        startValue = String(Number(startValue) - 1)
-        if (Number(startValue) > -1 && Number(startValue) < Number(maxValue)) {
-            allSetsCorrect(startValue, setStartValue)
-        } else {
-            allSetsIncorr(startValue, setStartValue, setClForInputStart)
-        }
+    const changeSettingsStartValue = (value: number) => {
+        setStartValue(value)
+        setMessage('changes')
     }
 
     let inputs = [{
-        id: 1,
-        name: 'max value:',
-        value: maxValue,
-        clForInput: clForInputMax,
-        upClickHandler: () => {
-            upClickHandlerMax()
-        },
-        downClickHandler: () => {
-            downClickHandlerMax()
+        id: v1(), name: 'max value:', value: maxValue, changeSettingsValue: (value: number) => {
+            changeSettingsMaxValue(value)
         }
     },
         {
-            id: 2,
-            name: 'start value:',
-            value: startValue,
-            clForInput: clForInputStart,
-            upClickHandler: () => {
-                upClickHandlerStart()
-            },
-            downClickHandler: () => {
-                downClickHandlerStart()
+            id: v1(), name: 'start value:', value: startValue, changeSettingsValue: (value: number) => {
+                changeSettingsStartValue(value)
             }
         },
     ]
     return (
         <div className={s.bgr}>
-            <Counter1 buttons={ButtonDataCont1} inputs={inputs} count={count}
-                      maxValue={Number(maxValue)}
-                      startValue={Number(startValue)}/>
-            <Counter2 buttons={ButtonDataCont2} count={count} maxValue={Number(maxValue)}/>
+            <FormWithSettings buttons={ButtonsData} inputs={inputs} count={count} message={message}
+                              maxValue={maxValue}
+                              startValue={startValue}/>
+            <Counter buttons={ButtonsData} count={count} maxValue={maxValue} message={message}/>
         </div>
     )
 }

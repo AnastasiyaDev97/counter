@@ -1,0 +1,18 @@
+.buttonActive{
+    padding-right: 15px;
+    padding-left: 15px;
+    height: 69%;
+    background-color:deepskyblue;
+    font-size: 30px;
+    font-weight: bold;
+    color:indigo;
+}
+.buttonNot{
+    background-color: darkgrey;
+    font-size: 30px;
+    font-weight: bold;
+    color: dimgrey;
+    padding-right: 15px;
+    padding-left: 15px;
+    height: 70%;
+}

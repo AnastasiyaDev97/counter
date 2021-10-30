@@ -1,26 +1,30 @@
 import s from "./DisplayWithSettings.module.css";
 import {InputsType} from "../App";
+import React, {ChangeEvent} from "react";
 
 export type DisplayWithSettingsPropsType = {
     inputs: InputsType
     count: number | string
     maxValue: number
     startValue: number
+    message: string
 }
 
 export const DisplayWithSettings = (props: DisplayWithSettingsPropsType) => {
 
     return (
-        <div className={s.tablo}>
-            {props.inputs.map(m =>
-                <div className={s.container}><span>{m.name}</span>
-                    <div className={s.fieldWithInput}>
-                        <input value={m.value}  className={props.startValue===props.maxValue?s.inputErr:m.clForInput}/>
-                        <div className={s.up} onClick={()=>{m.upClickHandler()}}></div>
-                        <div className={s.down} onClick={()=>m.downClickHandler()}></div>
+        <div className={s.display}>
+            {props.inputs.map(m => {
+                const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+                    m.changeSettingsValue(Number(e.currentTarget.value))
+                }
+                return (
+                    <div className={s.container}><span>{m.name}</span>
+                        <input  value={m.value} className={props.message==='error' ? s.inputErr : s.input} type={'number'}
+                               onChange={onChangeHandler}/>
                     </div>
-                </div>
-            )}
+                )
+            })}
         </div>
     )
 }
