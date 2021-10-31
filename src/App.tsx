@@ -1,16 +1,16 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect} from 'react'
 import s from './App.module.css'
 import {Counter} from "./Counter/Counter";
 import {FormWithSettings} from './FormWithSettings/FormWithSettings';
 import {v1} from "uuid";
+import {useDispatch, useSelector} from "react-redux";
+import {AppStateType} from "./bll/store";
+import {
+    incValue, toggleIncStatus, toggleResetStatus, toggleSetStatus,
+    updateCountValue, updateMaxValue,
+    updateMessageText, updateStartValue,
+} from "./bll/reducers/counter-reducer";
 
-export type buttonType = {
-    id: string
-    name: string
-    callback: () => void
-    status: boolean
-
-}
 export type inputType = {
     id: string
     name: string
@@ -18,101 +18,70 @@ export type inputType = {
     changeSettingsValue: (value: number) => void
 }
 export type InputsType = Array<inputType>
-export type ButtonDataType = Array<buttonType>
+
 
 export function App() {
+    let count = useSelector<AppStateType, number>(state => state.counter.count)
+    let startValue = useSelector<AppStateType, number>(state => state.counter.startValue)
+    let maxValue = useSelector<AppStateType, number>(state => state.counter.maxValue)
+    let message = useSelector<AppStateType, string>(state => state.counter.message)
+    let isSetActive = useSelector<AppStateType, boolean>(state => state.counter.isSetActive)
+    let isResetActive = useSelector<AppStateType, boolean>(state => state.counter.isResetActive)
+    let isIncActive = useSelector<AppStateType, boolean>(state => state.counter.isIncActive)
+    let dispatch = useDispatch()
 
-    let [count, setCount] = useState<number>(0)
-    let [startValue, setStartValue] = useState<number>(0)
-    let [maxValue, setMaxValue] = useState<number>(5)
-    let [message, setMessage] = useState('')
-    let [isSetActive, setIsSetActive] = useState(true)
-    let [isResetActive, setIsResetActive] = useState(!isSetActive && true)
-    let [isIncActive, setIsIncActive] = useState(!isSetActive && true)
-
-    let ButtonsData = [
-        {
-            id: v1(), name: 'set', callback: () => {
-                onSetHandler()
-            }, status: isSetActive
-        },
-        {
-            id: v1(), name: 'inc', callback: () => {
-                onIncHandler()
-            }, status: isIncActive
-        },
-        {
-            id: v1(), name: 'reset', callback: () => {
-                onResetHandler()
-            }, status: isResetActive
-        }
-    ]
+    if (count === maxValue) {
+        dispatch(toggleIncStatus(false))
+    }
 
 
     const onIncHandler = () => {
-        setIsResetActive(true)
+        dispatch(toggleResetStatus(true))
+        dispatch(toggleSetStatus(false))
         if (count < maxValue) {
-            count++
-            setCount(count)
-        }
-        if (count === maxValue) {
-            setIsIncActive(false)
+            dispatch(incValue())
         }
     }
 
     const onResetHandler = () => {
-        setIsResetActive(false)
-        setCount(startValue)
-        setIsIncActive(true)
-
+        dispatch(toggleResetStatus(false))
+        dispatch(updateCountValue(startValue))
+        dispatch(toggleIncStatus(true))
     }
 
     const onSetHandler = () => {
-        setCount(startValue)
-        setMessage('')
-        setIsSetActive(false)
-        setIsIncActive(true)
-        setToLocalStorage('maxValue', maxValue)
-        setToLocalStorage('startValue', startValue)
+        dispatch(updateCountValue(startValue))
+        dispatch(updateMessageText(''))
+        dispatch(toggleSetStatus(false))
+        dispatch(toggleIncStatus(true))
     }
 
-
-    useEffect(() => {
-        getFromLocalStorage('maxValue', setMaxValue)
-        getFromLocalStorage('startValue', setStartValue)
-    }, [])
-
-    const setToLocalStorage = (key: string, value: number) => {
-        localStorage.setItem(key, JSON.stringify(value))
-    }
-
-    const getFromLocalStorage = (key: string, setValue: (value: number) => void) => {
-        let ValueFromLocStAsString = localStorage.getItem(key)
-        if (ValueFromLocStAsString) {
-            setValue(JSON.parse(ValueFromLocStAsString))
-            if (key === 'startValue') {
-                setCount(JSON.parse(ValueFromLocStAsString))
-            }
-        }
-    }
 
     useEffect(() => {
         if (startValue >= maxValue || startValue < 0 || maxValue < 0 || maxValue <= startValue) {
-            setMessage('error')
-            setIsSetActive(false)
+            dispatch(updateMessageText('error'))
+            dispatch(toggleSetStatus(false))
         } else {
-            setIsSetActive(true)
+            dispatch(toggleSetStatus(true))
         }
     }, [startValue, maxValue])
 
+    useEffect(() => {
+        dispatch(toggleIncStatus(false))
+        dispatch(toggleResetStatus(false))
+    }, [])
 
     const changeSettingsMaxValue = (value: number) => {
-        setMaxValue(value)
-        setMessage('changes')
+        dispatch(updateMaxValue(value))
+        dispatch(updateMessageText('changes'))
+        dispatch(toggleIncStatus(false))
+        dispatch(toggleResetStatus(false))
     }
     const changeSettingsStartValue = (value: number) => {
-        setStartValue(value)
-        setMessage('changes')
+        dispatch(updateStartValue(value))
+        dispatch(updateMessageText('changes'))
+        dispatch(toggleIncStatus(false))
+        dispatch(toggleResetStatus(false))
     }
 
     let inputs = [{
@@ -128,10 +97,10 @@ export function App() {
     ]
     return (
         <div className={s.bgr}>
-            <FormWithSettings buttons={ButtonsData} inputs={inputs} count={count} message={message}
-                              maxValue={maxValue}
-                              startValue={startValue}/>
-            <Counter buttons={ButtonsData} count={count} maxValue={maxValue} message={message}/>
+            <FormWithSettings inputs={inputs} message={message} status={isSetActive} onSetHandler={onSetHandler}/>
+            <Counter statusInc={isIncActive} statusReset={isResetActive} count={count} maxValue={maxValue}
+                     message={message}
+                     onResetHandler={onResetHandler} onIncHandler={onIncHandler}/>
         </div>
     )
 }

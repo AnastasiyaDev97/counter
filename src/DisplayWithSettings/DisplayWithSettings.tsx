@@ -4,9 +4,6 @@ import React, {ChangeEvent} from "react";
 
 export type DisplayWithSettingsPropsType = {
     inputs: InputsType
-    count: number | string
-    maxValue: number
-    startValue: number
     message: string
 }
 

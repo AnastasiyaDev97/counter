@@ -2,29 +2,25 @@ import s from "./FormWithSettings.module.css"
 
 import {Button} from "../Button/Button";
 import React from "react";
-import {ButtonDataType, InputsType} from "../App";
+import {InputsType} from "../App";
 import {DisplayWithSettings} from "../DisplayWithSettings/DisplayWithSettings";
 
 export type FormWithSettingsPropsType = {
-    buttons: ButtonDataType
     inputs: InputsType
-    count: number | string
-    maxValue: number
-    startValue: number
-    message:string
+    message: string
+    onSetHandler: () => void
+    status: boolean
 }
 
 
 export const FormWithSettings = (props: FormWithSettingsPropsType) => {
-let btnSet=props.buttons.find(f=>f.name==='set')
+
     return (
         <div className={s.counterWrapper}>
-            <DisplayWithSettings inputs={props.inputs} count={props.count}
-                                 startValue={props.startValue}
-                                 maxValue={props.maxValue}
+            <DisplayWithSettings inputs={props.inputs}
                                  message={props.message}/>
             <div className={s.buttons}>
-                {btnSet&&<Button title={btnSet.name} callback={btnSet.callback} status={btnSet.status}/>}
+                <Button title={'set'} callback={props.onSetHandler} status={props.status}/>
             </div>
         </div>
     )
