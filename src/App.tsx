@@ -64,12 +64,12 @@ export function App() {
         } else {
             dispatch(toggleSetStatus(true))
         }
-    }, [startValue, maxValue])
+    }, [dispatch,startValue, maxValue])
 
     useEffect(() => {
         dispatch(toggleIncStatus(false))
         dispatch(toggleResetStatus(false))
-    }, [])
+    }, [dispatch])
 
     const changeSettingsMaxValue = (value: number) => {
         dispatch(updateMaxValue(value))
